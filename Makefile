@@ -1,8 +1,16 @@
+objs = key-schedule.o permutation.o des.o
 
-all : key permute
+des: $(objs)
+	gcc $(objs) -o des
 
-key : key-schedule.c
-	gcc key-schedule.c -o key
+key-schedule.o: key-schedule.c
+	gcc -c key-schedule.c 
 
-permute: permutation.c
-	gcc permutation.c -o permute
+permutation.o: permutation.c
+	gcc -c permutation.c 
+
+des.o: des.c
+	gcc -c des.c
+
+clean:
+	rm *.o

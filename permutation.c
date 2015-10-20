@@ -1,11 +1,10 @@
+#include "des.h"
 #include <stdio.h>
-#include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
 
-void print_bits(uint64_t, int);
 
-uint8_t IP_TABLE[64] = {
+static uint8_t IP_TABLE[64] = {
 58, 50, 42, 34, 26, 18, 10, 2,
 60, 52, 44, 36, 28, 10, 12, 4,
 62, 54, 46, 38, 30, 22, 14, 6,
@@ -16,7 +15,7 @@ uint8_t IP_TABLE[64] = {
 63, 55, 47, 39, 31, 23, 15, 7,
 };
 
-uint8_t IP1_TABLE[64] = {
+static uint8_t IP1_TABLE[64] = {
 40, 8, 48, 16, 56, 24, 64, 32,
 39, 7, 47, 15, 55, 23, 63, 31,
 38, 6, 46, 14, 54, 22, 62, 30,
@@ -27,7 +26,47 @@ uint8_t IP1_TABLE[64] = {
 33, 1, 41, 9,  49, 17, 57, 25,
 };
 
-uint64_t IP(uint64_t block, uint8_t table[]){
+uint64_t permute(uint64_t block, uint8_t table[], int num){
+    uint64_t out, tmp=1, result=0;
+    int i, shift;
+    for(i=0; i<num; i++){
+        shift = (table[i]-1-i);
+        if(shift > 0)
+            out = (block << shift) & (tmp << (63-i));
+        else
+            out = (block >> (-1 * shift)) & (tmp << (63-i));
+        result |= out;
+    }
+    return result;
+}
+
+uint64_t init_permute(uint64_t block){
+    return permute(block, IP_TABLE, sizeof(IP_TABLE));
+
+}
+
+uint64_t final_permute(uint64_t block){
+    return permute(block, IP1_TABLE, sizeof(IP1_TABLE));
+
+}
+
+void print_bits(uint64_t b, int len, int p){
+    int i;
+    uint64_t t=1;
+    for(i=0; i<len; i++){
+        if(b & (t<<63-i))
+            printf("%d",1);
+        else
+            printf("%d",0);
+
+        if((i+1)%p == 0)
+            printf(" ");
+    }
+    printf("\n");
+}
+
+/*
+uint64_t IP11(uint64_t block, uint8_t table[]){
     uint64_t out, tmp=1, result=0;
     int i, shift;
     for(i=0; i<64; i++){
@@ -47,7 +86,6 @@ uint64_t IP(uint64_t block, uint8_t table[]){
     }
     return result;
 }
-
 
 
 void test(){
@@ -134,8 +172,6 @@ void print_bits(uint64_t b, int len){
     }
     printf("\n");
 }
-
-
 int main(int argc, char **argv)
 {
 //   test_shift();
@@ -150,4 +186,4 @@ int main(int argc, char **argv)
     print_bits(b, 64);
     print_bits(rb, 64);
     return 0;
-}
+}*/
