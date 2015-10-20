@@ -1,3 +1,12 @@
+/* key schedule
+ *    1.Initial permutaiton (64 bits to 56)
+ *    2.spliting to c, d (each 28 bits)
+ *    3.shifts
+ *    4.Final permutation (56 bits to 48)
+ *
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -61,8 +70,8 @@ void print_bits(uint64_t b, int len, int p){
     printf("\n");
 }
 
-#define CK(k) ((k) & 0xffffffff00000000)
-#define DK(k)  (((k)<<28) & 0xffffffff00000000)
+#define CK(k) ((k) & 0xfffffff000000000)
+#define DK(k)  (((k)<<28) & 0xfffffff000000000)
 
 uint64_t left_one(uint64_t b){
     if(b & 0x8000000000000000)
@@ -114,19 +123,61 @@ KS(int n, uint64_t key){
 
 }
 
+uint64_t KS1(int n, uint64_t key){
+    static uint64_t keys[17] = {0, 0,};
+    static uint8_t shift_table[16] = {
+                                1, 1, 2, 2, 2, 2, 2, 2,
+                                1, 2, 2, 2, 2, 2, 2, 1
+                              };
+    uint64_t c, d, result;
+
+    if(keys[n] != 0)
+        return keys[n];
+
+    if(n == 0){
+        c = CK(key);
+        d = DK(key);
+        keys[0] = (c | (d >> 28));
+        return keys[0];
+    }
+
+    result = KS1(n-1, key);
+    c = CK(result);
+    d = DK(result);
+    int i;
+    for(i=0; i<shift_table[n-1]; i++){
+        c = left_one(c);
+        d = left_one(d);
+    }
+    keys[n] = (c | (d >> 28));
+    return keys[n];
+
+}
+
+uint64_t KSS(int n, uint64_t key){
+    uint64_t k;
+    k = IP(key, PC1, sizeof(PC1));
+    k = KS1(n, k);
+    return IP(k, PC2, sizeof(PC2));
+}
+
 int main()
 {
-    uint64_t k = 0x0123456789abcdef, k1, c, d;
+    uint64_t k = 0x0123456789abcdef, k1, c, d, result;
     k1 = IP(k,PC1, sizeof(PC1));
-    //print_bits(k, 64, 8);
-    //print_bits(k1, 56, 7);
-    
-    //c = CK(k1);
-    //d = DK(k1);
-    //print_bits(c, 28, 7);
-    //print_bits(d, 28, 7);
     int i;
+
     struct key_pair r;
+    for(i=0; i <= 16; i++){
+        r = KS(i, k1);
+        d = Merge_key_pair(r);
+        d = IP(d,PC2, sizeof(PC2));
+        c = KSS(i, k);
+        assert(d == c);
+        printf("K%.2d: ", i);
+        print_bits(c, 48, 6);
+    }
+/*
     for(i=1; i <= 16; i++){
         r = KS(i, k1);
         k = Merge_key_pair(r);
@@ -138,5 +189,13 @@ int main()
       //  printf("D%.2d: ", i);
      //   print_bits(r.d_key, 28, 7);
     }
+
+    printf("\n\n");
+    for(i=1; i <= 16; i++){
+        k = KSS(i, k1);
+        printf("K%.2d: ", i);
+        print_bits(k, 48, 6);
+    }
+    */
     return 0;
 }
