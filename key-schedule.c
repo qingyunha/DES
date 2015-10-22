@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
-uint64_t left_one(uint64_t b);
-uint64_t KS1(int n, uint64_t key);
+u64 left_one(u64 b);
+u64 KS1(int n, u64 key);
 
 
 static uint8_t PC1[56]= {
@@ -42,7 +42,7 @@ static uint8_t PC2[48]= {
 #define CK(k) ((k) & 0xfffffff000000000)
 #define DK(k)  (((k)<<28) & 0xfffffff000000000)
 
-uint64_t left_one(uint64_t b){
+u64 left_one(u64 b){
     if(b & 0x8000000000000000)
         return (b << 1) | 0x0000001000000000;
     else
@@ -50,21 +50,21 @@ uint64_t left_one(uint64_t b){
 
 }
 
-uint64_t KS(int n, uint64_t key){
-    uint64_t k;
+u48 KS(int n, u64 key){
+    u64 k;
     k = permute(key, PC1, sizeof(PC1));
     k = KS1(n, k);
     k = permute(k, PC2, sizeof(PC2));
     return k;
 }
 
-uint64_t KS1(int n, uint64_t key){
-    static uint64_t keys[17] = {0, 0,};
+u56 KS1(int n, u64 key){
+    static u64 keys[17] = {0, 0,};
     static uint8_t shift_table[16] = {
                                 1, 1, 2, 2, 2, 2, 2, 2,
                                 1, 2, 2, 2, 2, 2, 2, 1
                               };
-    uint64_t c, d, result;
+    u64 c, d, result;
 
     if(keys[n] != 0)
         return keys[n];
@@ -91,16 +91,16 @@ uint64_t KS1(int n, uint64_t key){
 
 
 struct key_pair {
-    uint64_t c_key;
-    uint64_t d_key;
+    u64 c_key;
+    u64 d_key;
 };
 
 #define Merge_key_pair(pair)  ((pair).c_key | ((pair).d_key >> 28))
 
 struct key_pair 
-KS_pair(int n, uint64_t key){
-    static uint64_t c_keys[17] = {0, 0,};
-    static uint64_t d_keys[17] = {0, 0,};
+KS_pair(int n, u64 key){
+    static u64 c_keys[17] = {0, 0,};
+    static u64 d_keys[17] = {0, 0,};
     static uint8_t shift_table[16] = {
                                 1, 1, 2, 2, 2, 2, 2, 2,
                                 1, 2, 2, 2, 2, 2, 2, 1
@@ -134,7 +134,7 @@ KS_pair(int n, uint64_t key){
 /*
 int main()
 {
-    uint64_t k = 0x0123456789abcdef, k1, c, d, result;
+    u64 k = 0x0123456789abcdef, k1, c, d, result;
     k1 = permute(k,PC1, sizeof(PC1));
     int i;
 

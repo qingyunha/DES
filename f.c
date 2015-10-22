@@ -1,9 +1,8 @@
 #include "des.h"
 #include <stdio.h>
 
-#define L(b) ((b) & 0xffffffff00000000)
-#define R(b) (((b) << 32) & 0xffffffff00000000)
 
+//& 0x00000000ffffffff
 
 
 /*Expend */
@@ -21,8 +20,6 @@ static uint8_t E_table[48] = {
 u48 E(u32 R){
     return permute(R, E_table, sizeof(E_table));
 }
-
-
 
 
 
@@ -149,29 +146,18 @@ u32 f(u32 R, u48 key){
     return P(tmp);
 }
 
-
+/*
+//Encrypt
 int main()
 {
-    u64 k,k1, key = 0x0123456789abcdef;
-    u64 msg = 0x0123456789abcdef;
+    u64 k,k1, key = 0x1111111111111111;// 0x133457799bbcdff1;
+    u64 r, msg = 0x0123456789abcdef;
     u32 L0, R0, L1, R1, tmp;
-    msg = init_permute(msg);
 
+    msg = init_permute(msg);
     L0 = L(msg);
     R0 = R(msg);
-    //print_bits(R0, 32, 4);
 
-    //R0 = E(R0);
-    //print_bits(R0, 48, 6);
-   /* 
-    k1 = KS(1, key);
-    tmp = f(R0, k1);
-    R1 = L0 ^ tmp;
-    L1 = R0;
-    print_bits(L1, 32, 4);
-    print_bits(R1, 32, 4);
-    print_bits(tmp, 32, 4);
-   */
     int i;
     for(i=0; i<16; i++){
         k = KS(i+1, key);
@@ -180,16 +166,14 @@ int main()
         R0 = R1;
         L0 = L1;
     }
-    print_bits(L1, 32, 4);
-    print_bits(R1, 32, 4);
+    //print_bits(L1, 32, 4);
+    //print_bits(R1, 32, 4);
+    
+    r = MEGER(R1, L1);
+    //print_bits(r, 64, 8);
+    r = final_permute(r);
+    //print_bits(r, 64, 8);
+    printf("%.16lx\n", r);
     return 0;
 }
-
-/*
- *
-    k = (k^R0);
-    print_bits(k, 48, 6);
-
-    k = S_box(k);
-    print_bits(k, 32, 4);
 */

@@ -26,8 +26,8 @@ static uint8_t IP1_TABLE[64] = {
 33, 1, 41, 9,  49, 17, 57, 25,
 };
 
-uint64_t permute(uint64_t block, uint8_t table[], int num){
-    uint64_t out, tmp=1, result=0;
+u64 permute(u64 block, uint8_t table[], int num){
+    u64 out, tmp=1, result=0;
     int i, shift;
     for(i=0; i<num; i++){
         shift = (table[i]-1-i);
@@ -40,19 +40,19 @@ uint64_t permute(uint64_t block, uint8_t table[], int num){
     return result;
 }
 
-uint64_t init_permute(uint64_t block){
+u64 init_permute(u64 block){
     return permute(block, IP_TABLE, sizeof(IP_TABLE));
 
 }
 
-uint64_t final_permute(uint64_t block){
+u64 final_permute(u64 block){
     return permute(block, IP1_TABLE, sizeof(IP1_TABLE));
 
 }
 
-void print_bits(uint64_t b, int len, int p){
+void print_bits(u64 b, int len, int p){
     int i;
-    uint64_t t=1;
+    u64 t=1;
     for(i=0; i<len; i++){
         if(b & (t<<63-i))
             printf("%d",1);
@@ -66,8 +66,8 @@ void print_bits(uint64_t b, int len, int p){
 }
 
 /*
-uint64_t IP11(uint64_t block, uint8_t table[]){
-    uint64_t out, tmp=1, result=0;
+u64 IP11(u64 block, uint8_t table[]){
+    u64 out, tmp=1, result=0;
     int i, shift;
     for(i=0; i<64; i++){
         shift = (table[i]-1-i);
@@ -89,9 +89,9 @@ uint64_t IP11(uint64_t block, uint8_t table[]){
 
 
 void test(){
-    uint64_t t, b, tmp=1, result=0;
+    u64 t, b, tmp=1, result=0;
     int i = 29;
-    uint64_t block = 0x0123456789abcdef;
+    u64 block = 0x0123456789abcdef;
 
     printf("move %d to %d\n", IP_TABLE[i], (i+1));
     print_bits(block, 64);
@@ -116,7 +116,7 @@ void test(){
 
 void test_shift(){
     int i;
-    uint64_t b,tmp = 1;
+    u64 b,tmp = 1;
     for(i=0; i<64; i++){
         b = tmp << (63-i);
         printf("B: %.16lx\n", b);
@@ -127,7 +127,7 @@ void test_shift(){
 
 void test_bshift(){
     int i;
-    uint64_t b,block=0xffffffffffffffff;
+    u64 b,block=0xffffffffffffffff;
     for(i=0; i<64; i++){
         b = (block << (IP_TABLE[i]-1));
         printf("B: %.16lx\n", b);
@@ -138,7 +138,7 @@ void test_bshift(){
 
 void test_lrshift()
 {
-    uint64_t b, c, block = 0x0123456789abcdef, tmp=1;
+    u64 b, c, block = 0x0123456789abcdef, tmp=1;
     int i, shift;
     for(i=0; i<63; i++){
         shift = IP_TABLE[i]-1-i;
@@ -158,9 +158,9 @@ void test_lrshift()
     }
 }
 
-void print_bits(uint64_t b, int len){
+void print_bits(u64 b, int len){
     int i;
-    uint64_t t=1;
+    u64 t=1;
     for(i=0; i<len; i++){
         if(b & (t<<63-i))
             printf("%d",1);
@@ -178,8 +178,8 @@ int main(int argc, char **argv)
 //   test_bshift();
 //   test_lrshift();
 //    test();
-    uint64_t b = 0x0123456789abcdef;
-    uint64_t rb;
+    u64 b = 0x0123456789abcdef;
+    u64 rb;
     rb = IP(b, IP_TABLE);
     printf("IP: %.16lx\n", b);
     printf("IP: %.16lx\n", rb);
