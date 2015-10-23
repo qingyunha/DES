@@ -17,3 +17,5 @@ u48 KS(int n, u64 key);
 /* f.c */
 
 u32 f(u32 R, u48 key);
+
+

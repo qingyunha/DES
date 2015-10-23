@@ -2,22 +2,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <assert.h>
-
 
 #define L(b) ((b) & 0xffffffff00000000)
 #define R(b) (((b) << 32) & 0xffffffff00000000)
-#define MEGER(l,r) ((l) | ((r) >> 32)) 
+#define MEGER(l,r) ((l) | (((r) >> 32) & 0x00000000ffffffff)) 
 
 int des(u64 key, u64 msg, int flag)
 {
-    u64 k;//, key = 0x1111111111111111;// 0x133457799bbcdff1;
-    u64 r; //msg = 0x0123456789abcdef;
-    u32 L0, R0, L1, R1, tmp;
+    u64 k, r, m;
+    u32 L0, R0, L1, R1;
 
-    msg = init_permute(msg);
-    L0 = L(msg);
-    R0 = R(msg);
+    m = init_permute(msg);
+    L0 = L(m);
+    R0 = R(m);
+
+#ifdef DEBUG
+    printf("Initial permutation:\n");
+    print_bits(m, 64, 8);
+
+    printf("L0: ");
+    print_bits(L0, 32, 8);
+    printf("R0: ");
+    print_bits(R0, 32, 8);
+#endif
 
     int i, n;
     for(i=0; i<16; i++){
@@ -27,17 +34,36 @@ int des(u64 key, u64 msg, int flag)
         R1 = (L0 ^ f(R0,k));
         R0 = R1;
         L0 = L1;
+#ifdef DEBUG
+    printf("Key%.2d: ",n);
+    print_bits(k, 48, 6);
+    if(i == 0){
+        printf("after 1st iteration:\n");
+        printf("L1: ");
+        print_bits(L0, 32, 8);
+        printf("R1: ");
+        print_bits(R0, 32, 8);
+    }
+    if(i == 15){
+        printf("after 16st iteration:\n");
+        printf("L16: ");
+        print_bits(L0, 32, 8);
+        printf("R16: ");
+        print_bits(R0, 32, 8);
+    }
+#endif
     }
     r = MEGER(R1, L1);
     r = final_permute(r);
-    if(flag)
-        printf("Encrypting\n");
-    else
-        printf("Dncrypting\n");
 
-    printf("Given Key: 0x%.16lx\n", key);
-    printf("Given Message: 0x%.16lx\n", msg);
-    printf("Output: 0x%.16lx\n", r);
+    if(flag)
+        printf("Encrypting...\n");
+    else
+        printf("Decrypting...\n");
+
+    printf("\tGiven Key: 0x%.16lx\n", key);
+    printf("\tGiven Message: 0x%.16lx\n", msg);
+    printf("\tOutput: 0x%.16lx\n", r);
     return 0;
 }
 
@@ -70,14 +96,4 @@ int main(int argc, char **argv)
     return 0;
 }
 
-
-    /*
-    print_bits(init_permute(msg), 64, 8);
-    int i;
-    for(i=1; i <= 16; i++){
-        k = KS(i, key);
-        printf("K%.2d: ", i);
-        print_bits(k, 48, 6);
-    }
-    */
 

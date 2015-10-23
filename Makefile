@@ -3,16 +3,10 @@ objs = key-schedule.o permutation.o des.o f.o
 des: $(objs)
 	gcc $(objs) -o des
 
-key-schedule.o: key-schedule.c
-	gcc -c key-schedule.c 
+ddes: $(obgs)
+	gcc -D DEBUG=1 $(objs) -o ddes
 
-permutation.o: permutation.c
-	gcc -c permutation.c 
-
-des.o: des.c
-	gcc -c des.c
-
-f.o: f.c permutation.c key-schedule.c
+f.o: f.c permutation.c key-schedule.c des.h
 	gcc -c f.c permutation.c key-schedule.c
 
 clean:
